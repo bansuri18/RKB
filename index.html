@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter of Gratitude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:      #1a2a3a;
+    --navy-mid:  #243447;
+    --navy-lt:   #2e4057;
+    --slate:     #4a6278;
+    --slate-lt:  #e8edf2;
+    --steel:     #6b8299;
+    --cream:     #f5f2ee;
+    --parchment: #ede8e0;
+    --ink:       #1c2830;
+    --ink-soft:  #4a5c6a;
+    --gold:      #b8922e;
+    --gold-lt:   #f0e4c0;
+    --gold-mid:  #d4aa4e;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--cream);
+    font-family: 'Jost', sans-serif;
+    color: var(--ink);
+    cursor: default;
+  }
+
+  /* ─── FLOATING QUOTES ─────────────────────────────────────── */
+  #quote-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .quote-bubble {
+    position: absolute;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--slate);
+    opacity: 0;
+    max-width: 180px;
+    text-align: center;
+    animation: floatQuote linear infinite;
+    white-space: normal;
+  }
+
+  @keyframes floatQuote {
+    0%   { opacity: 0; transform: translateY(0) rotate(var(--rot)); }
+    8%   { opacity: 0.45; }
+    88%  { opacity: 0.45; }
+    100% { opacity: 0; transform: translateY(-105vh) rotate(calc(var(--rot) + 8deg)); }
+  }
+
+  /* ─── PETAL PARTICLES ──────────────────────────────────────── */
+  .petal {
+    position: absolute;
+    border-radius: 60% 40% 60% 40% / 50% 50% 50% 50%;
+    opacity: 0;
+    animation: petalDrift linear infinite;
+    pointer-events: none;
+  }
+  @keyframes petalDrift {
+    0%   { opacity: 0; transform: translateY(0) rotate(var(--pr)) scale(1); }
+    6%   { opacity: 0.35; }
+    90%  { opacity: 0.25; }
+    100% { opacity: 0; transform: translateY(-110vh) rotate(calc(var(--pr) + 180deg)) scale(0.7); }
+  }
+
+  /* ─── ENVELOPE SCREEN ─────────────────────────────────────── */
+  #envelope-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    background: var(--cream);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  #envelope-screen.exiting {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+  }
+
+  .env-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 11px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .envelope {
+    position: relative;
+    width: min(420px, 88vw);
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.7s forwards;
+    filter: drop-shadow(0 24px 48px rgba(26,42,58,0.18));
+  }
+
+  .env-body {
+    width: 100%;
+    aspect-ratio: 1.618 / 1;
+    background: var(--parchment);
+    border-radius: 4px;
+    border: 1.5px solid #ccc4b4;
+    position: relative;
+    overflow: visible;
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), filter 0.4s ease;
+  }
+
+  .envelope:hover .env-body {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 32px 56px rgba(26,42,58,0.26));
+  }
+
+  /* flap */
+  .env-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 55%;
+    overflow: hidden;
+    transform-origin: top center;
+    transition: transform 0.6s cubic-bezier(.4,0,.2,1);
+    z-index: 3;
+  }
+
+  .env-flap-inner {
+    width: 100%;
+    height: 200%;
+    position: relative;
+  }
+
+  .env-flap-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: var(--parchment);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    border-right: 1.5px solid #c0b49e;
+    border-left: 1.5px solid #c0b49e;
+    filter: brightness(0.95);
+  }
+
+  .envelope:hover .env-flap {
+    transform: rotateX(-30deg);
+  }
+
+  /* inner triangles for envelope look */
+  .env-tri-left {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 52%;
+    height: 60%;
+    background: #e0d8cc;
+    clip-path: polygon(0 100%, 100% 100%, 0 0);
+    z-index: 1;
+    border-right: 1px solid #ccc0b0;
+  }
+  .env-tri-right {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 52%;
+    height: 60%;
+    background: #e0d8cc;
+    clip-path: polygon(100% 100%, 0 100%, 100% 0);
+    z-index: 1;
+    border-left: 1px solid #ccc0b0;
+  }
+  .env-tri-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 52%;
+    background: var(--parchment);
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
+    z-index: 2;
+    border-top: 1px solid #c0b49e;
+  }
+
+  /* wax seal */
+  .seal {
+    position: absolute;
+    left: 50%;
+    bottom: -18px;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 52px;
+    height: 52px;
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .envelope:hover .seal {
+    transform: translateX(-50%) scale(1.12) rotate(-5deg);
+  }
+
+  .seal-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2e4057, #1a2a3a);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 12px rgba(26,42,58,0.45), inset 0 1px 2px rgba(255,255,255,0.1);
+  }
+
+  .seal-text {
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: var(--gold-mid);
+    line-height: 1;
+  }
+
+  .env-to {
+    position: absolute;
+    bottom: 30px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 5;
+  }
+  .env-to-label {
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+    opacity: 0.6;
+  }
+  .env-to-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .env-cta {
+    margin-top: 52px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--slate);
+    opacity: 0;
+    animation: fadeUp 1s ease 1.3s forwards, pulse 2.4s ease 2.4s infinite;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cta-line {
+    width: 28px;
+    height: 1px;
+    background: var(--slate);
+    opacity: 0.5;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1; }
+  }
+
+  /* ─── LETTER SCREEN ────────────────────────────────────────── */
+  #letter-screen {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(30px);
+    transition: opacity 0.9s ease 0.2s, transform 0.9s ease 0.2s;
+    background: var(--cream);
+  }
+
+  #letter-screen.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .letter-bg {
+    min-height: 100vh;
+    padding: 60px 20px 100px;
+    position: relative;
+  }
+
+  /* decorative arcs top */
+  .letter-bg::before {
+    content: '';
+    position: fixed;
+    top: -120px; left: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    border: 60px solid var(--slate-lt);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+  .letter-bg::after {
+    content: '';
+    position: fixed;
+    bottom: -100px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    border: 50px solid var(--gold-lt);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.45;
+  }
+
+  .letter-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .letter-paper {
+    background: #faf8f5;
+    border: 1px solid #d8d0c4;
+    border-radius: 2px;
+    padding: clamp(36px, 7vw, 68px) clamp(28px, 8vw, 72px) clamp(48px, 8vw, 80px);
+    position: relative;
+    box-shadow:
+      0 2px 0 #ccc4b8,
+      0 4px 0 #e8e0d8,
+      0 2px 32px rgba(26,42,58,0.06),
+      0 16px 60px rgba(26,42,58,0.05);
+  }
+
+  /* ruled lines subtle */
+  .letter-paper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      #ddd8d0 31px,
+      #ddd8d0 32px
+    );
+    background-position: 0 84px;
+    border-radius: 2px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* left margin line */
+  .letter-paper::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: clamp(56px, 12vw, 100px);
+    width: 1px;
+    background: #b8aa9a;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .letter-header {
+    text-align: right;
+    margin-bottom: 44px;
+  }
+
+  .letter-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-soft);
+    letter-spacing: 0.5px;
+  }
+
+  .letter-salutation {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 32px;
+    line-height: 1.3;
+  }
+
+  .letter-body p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.9;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .letter-body em {
+    font-style: italic;
+    color: var(--navy-lt);
+  }
+
+  .letter-body strong {
+    font-weight: 600;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  /* milestone block */
+  .milestone-block {
+    margin: 36px 0;
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #e8edf4 0%, #edf0f5 100%);
+    border-left: 2.5px solid var(--navy-lt);
+    border-radius: 0 4px 4px 0;
+    position: relative;
+  }
+
+  .milestone-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 9.5px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--navy-lt);
+    margin-bottom: 18px;
+  }
+
+  .milestone-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: all 0.5s ease;
+  }
+
+  .milestone-item.revealed {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .milestone-item:last-child { margin-bottom: 0; }
+
+  .m-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+
+  .milestone-item span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16.5px;
+    color: var(--ink);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .milestone-item span em {
+    color: var(--gold);
+  }
+
+  /* closing */
+  .letter-closing {
+    margin-top: 40px;
+  }
+
+  .letter-closing p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.9;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .sign-off-wrap {
+    margin-top: 36px;
+  }
+
+  .sign-off-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
+  .signature {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 52px;
+    background: linear-gradient(135deg, var(--navy), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  /* divider */
+  .floral-divider {
+    text-align: center;
+    margin: 36px 0;
+    color: var(--gold);
+    opacity: 0.5;
+    font-size: 18px;
+    letter-spacing: 10px;
+  }
+
+  /* ─── QUOTE FLOATERS in letter screen ─────────────────────── */
+  .letter-side-quote {
+    position: absolute;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--slate);
+    max-width: 140px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    animation: floatQuote linear infinite;
+    white-space: normal;
+  }
+
+  /* stagger letter paragraphs */
+  .letter-body p, .letter-salutation, .milestone-block, .letter-closing p, .sign-off-wrap {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .letter-body p.show, .letter-salutation.show, .milestone-block.show,
+  .letter-closing p.show, .sign-off-wrap.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* back button */
+  #back-btn {
+    position: fixed;
+    top: 24px; left: 24px;
+    z-index: 100;
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--slate);
+    background: rgba(245,242,238,0.88);
+    border: 1px solid #c8c0b4;
+    padding: 10px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    backdrop-filter: blur(6px);
+  }
+
+  #back-btn:hover {
+    background: var(--slate-lt);
+    color: var(--navy);
+  }
+
+  #back-btn.visible {
+    opacity: 1;
+  }
+
+  /* scroll indicator */
+  #scroll-hint {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  #scroll-hint.visible { opacity: 1; }
+
+  .scroll-label {
+    font-family: 'Jost', sans-serif;
+    font-weight: 200;
+    font-size: 9.5px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .scroll-arrow {
+    width: 14px; height: 14px;
+    border-right: 1px solid var(--slate);
+    border-bottom: 1px solid var(--slate);
+    transform: rotate(45deg);
+    animation: bounceDown 1.6s ease infinite;
+  }
+
+  @keyframes bounceDown {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(4px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── FLOATING QUOTE LAYER (envelope screen) ─────────────────── -->
+<div id="quote-layer"></div>
+
+<!-- ── ENVELOPE SCREEN ────────────────────────────────────────── -->
+<div id="envelope-screen">
+  <div class="env-eyebrow">A letter awaits you</div>
+
+  <div class="envelope" id="envelope" title="Click to open">
+    <div class="env-body">
+      <div class="env-flap">
+        <div class="env-flap-inner"></div>
+      </div>
+      <div class="env-tri-left"></div>
+      <div class="env-tri-right"></div>
+      <div class="env-tri-bottom"></div>
+      <div class="env-to">
+        <div class="env-to-label">To</div>
+        <div class="env-to-name">My Dear Teacher</div>
+      </div>
+    </div>
+    <div class="seal">
+      <div class="seal-circle">
+        <span class="seal-text">✦</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="env-cta">
+    <span class="cta-line"></span>
+    Click to open
+    <span class="cta-line"></span>
+  </div>
+</div>
+
+<!-- ── LETTER SCREEN ───────────────────────────────────────────── -->
+<div id="letter-screen">
+  <button id="back-btn" onclick="closeLetterScreen()">← Back</button>
+
+  <div class="letter-bg">
+    <div class="letter-wrap">
+      <div class="letter-paper">
+
+<div class="letter-salutation">Dear Sir,</div>
+<div class="letter-body">
+  <p>There are some people who walk into our lives quietly — without fanfare, without announcement — and yet leave behind something that changes us forever. You are one of those people. As I step out of college and into the next chapter of my life, I find myself returning to you, one last time, to say something I am not sure words can ever fully hold: <strong>thank you.</strong></p>
+
+  <p>I still remember the version of me who first came to you — unsure, full of questions I did not even know how to ask, standing at the very beginning of something I could not yet name. I did not know then that those early conversations would shape so much of what came after.</p>
+
+  <p>But you made space for all of it. You guided me through the fundamentals of hydroponics, through the quiet logic of IoT system design — patiently, generously, one step at a time. You never made me feel small for not knowing. You gave me a foundation I did not know I needed, and the confidence to build on it.</p>
+
+  <div class="floral-divider">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+  <div class="milestone-block">
+    <div class="milestone-eyebrow">From early questions — to building something meaningful</div>
+    <div class="milestone-item">
+      <div class="m-dot"></div>
+      <span>Explored and built a deep passion for smart agriculture and IoT — a journey you helped set in motion</span>
+    </div>
+    <div class="milestone-item">
+      <div class="m-dot"></div>
+      <span>Developed a hydroponics-based smart system using IoT — shaped by the foundation you gave me</span>
+    </div>
+    <div class="milestone-item">
+      <div class="m-dot"></div>
+      <span>Presented at the IET Scholarship and came home as <em>First Runner Up</em> — a moment I will carry always</span>
+    </div>
+  </div>
+
+  <p>None of that would have been possible without you. Every idea I chased, every room I walked into with confidence, every moment I chose to keep going — you were there, quietly, in the back of my mind. Reminding me I was ready. Because of you, I was.</p>
+
+  <p>You were my mentor, yes — but you were so much more than that. You were the guide I did not know I needed, at exactly the moment I needed one most. The patience you offered, the knowledge you shared, the faith you placed in me so freely and so genuinely — I have carried it with me every single day since.</p>
+</div>
+
+<div class="floral-divider">✦ &nbsp; ✦ &nbsp; ✦</div>
+
+<div class="letter-closing">
+  <p>I will never forget what you did for me. Not because it was grand or dramatic, but because it was <em>real</em> — and it changed the direction of my life. I am so grateful, more than I can say, to have met you at the right time. To have been guided by you. To have been believed in, by you.</p>
+
+  <p>Thank you, Sir. From the very bottom of my heart. For everything.</p>
+
+  <div class="sign-off-wrap">
+    <div class="sign-off-label">With all my gratitude and respect,</div>
+    <div class="signature">Vansika</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="scroll-hint">
+    <span class="scroll-label">Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</div>
+
+<script>
+const QUOTES = [
+  '"A teacher affects eternity."',
+  '"The influence of a great teacher can never be erased."',
+  '"Teaching is the greatest act of optimism."',
+  '"A good teacher can inspire hope."',
+  '"Teachers plant seeds of knowledge that grow forever."',
+  '"One looks back with appreciation to brilliant teachers."',
+  '"A teacher takes a hand, opens a mind, touches a heart."',
+  '"What greater gift than the love of a teacher?"',
+  '"Teaching is a work of heart."',
+  '"To teach is to touch a life forever."',
+  '"Behind every successful student is a teacher who believed."',
+  '"A teacher\'s kindness changes everything."',
+];
+
+const quoteLayer = document.getElementById('quote-layer');
+
+function spawnQuote() {
+  const el = document.createElement('div');
+  el.className = 'quote-bubble';
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  el.textContent = q;
+  const dur = 14 + Math.random() * 10;
+  const rot = (Math.random() - 0.5) * 18;
+  el.style.cssText = `
+    left: ${5 + Math.random() * 85}%;
+    bottom: -60px;
+    --rot: ${rot}deg;
+    animation-duration: ${dur}s;
+    animation-delay: 0s;
+    font-size: ${10.5 + Math.random() * 2}px;
+  `;
+  quoteLayer.appendChild(el);
+  setTimeout(() => el.remove(), dur * 1000 + 500);
+}
+
+const petalColors = ['#c8d8e8','#d4e0ec','#e0d4c0','#c8d0dc','#d8c8a8','#bcc8d4'];
+
+function spawnPetal() {
+  const el = document.createElement('div');
+  el.className = 'petal';
+  const size = 8 + Math.random() * 10;
+  const dur  = 10 + Math.random() * 12;
+  const rot  = Math.random() * 360;
+  el.style.cssText = `
+    width: ${size}px;
+    height: ${size * 1.4}px;
+    background: ${petalColors[Math.floor(Math.random() * petalColors.length)]};
+    left: ${Math.random() * 100}%;
+    bottom: -20px;
+    --pr: ${rot}deg;
+    animation-duration: ${dur}s;
+    animation-delay: 0s;
+  `;
+  quoteLayer.appendChild(el);
+  setTimeout(() => el.remove(), dur * 1000 + 300);
+}
+
+for(let i = 0; i < 4; i++) {
+  setTimeout(spawnQuote, i * 900);
+  setTimeout(spawnPetal, i * 600 + 300);
+}
+setInterval(spawnQuote, 2800);
+setInterval(spawnPetal, 1200);
+
+const envelope  = document.getElementById('envelope');
+const envScreen = document.getElementById('envelope-screen');
+const letScreen = document.getElementById('letter-screen');
+const backBtn   = document.getElementById('back-btn');
+const scrollHint= document.getElementById('scroll-hint');
+
+envelope.addEventListener('click', openLetterScreen);
+
+function openLetterScreen() {
+  envScreen.classList.add('exiting');
+  quoteLayer.style.display = 'none';
+
+  setTimeout(() => {
+    envScreen.style.display = 'none';
+    letScreen.classList.add('visible');
+    backBtn.classList.add('visible');
+    scrollHint.classList.add('visible');
+    revealLetterElements();
+    startSideQuotes();
+  }, 950);
+}
+
+function closeLetterScreen() {
+  letScreen.classList.remove('visible');
+  backBtn.classList.remove('visible');
+  scrollHint.classList.remove('visible');
+  envScreen.style.display = 'flex';
+  quoteLayer.style.display = 'block';
+
+  setTimeout(() => {
+    envScreen.classList.remove('exiting');
+    document.querySelectorAll('.letter-body p, .letter-salutation, .milestone-block, .letter-closing p, .sign-off-wrap')
+      .forEach(el => { el.classList.remove('show'); });
+    document.querySelectorAll('.milestone-item').forEach(el => el.classList.remove('revealed'));
+  }, 50);
+}
+
+function revealLetterElements() {
+  const els = document.querySelectorAll('.letter-body p, .letter-salutation, .milestone-block, .letter-closing p, .sign-off-wrap');
+  els.forEach((el, i) => {
+    setTimeout(() => el.classList.add('show'), 200 + i * 130);
+  });
+
+  const milestones = document.querySelectorAll('.milestone-item');
+  milestones.forEach((m, i) => {
+    setTimeout(() => m.classList.add('revealed'), 900 + i * 220);
+  });
+}
+
+letScreen.addEventListener('scroll', () => {
+  if (letScreen.scrollTop > 80) {
+    scrollHint.classList.remove('visible');
+  }
+});
+
+const sideQuotes = [
+  '"The influence of a great teacher can never be erased."',
+  '"A teacher takes a hand, opens a mind, touches a heart."',
+  '"To teach is to touch a life forever."',
+  '"Behind every confident voice is a teacher who believed."',
+  '"Teaching is a work of heart."',
+];
+
+function startSideQuotes() {
+  function spawnSide(side) {
+    const el = document.createElement('div');
+    el.className = 'letter-side-quote';
+    el.textContent = sideQuotes[Math.floor(Math.random() * sideQuotes.length)];
+    const dur = 12 + Math.random() * 8;
+    el.style.cssText = `
+     ${side}: ${2 + Math.random() * 3}%;
+     top: ${10 + Math.random() * 70}%;
+     animation-duration: ${dur}s;
+     animation-delay: 0s;
+    `;
+    letScreen.appendChild(el);
+    setTimeout(() => el.remove(), dur * 1000 + 300);
+  }
+
+  spawnSide('left');
+  setTimeout(() => spawnSide('right'), 2000);
+  const sideTimer = setInterval(() => {
+    if (!letScreen.classList.contains('visible')) { clearInterval(sideTimer); return; }
+    spawnSide(Math.random() > 0.5 ? 'left' : 'right');
+  }, 4500);
+}
+</script>
+</body>
+</html>
